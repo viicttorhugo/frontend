@@ -1,34 +1,27 @@
-import { useEffect } from "react";
-import { auth, googleProvider } from "../firebase";
-import { signInWithPopup } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const [user] = useAuthState(auth);
   const navigate = useNavigate();
-  const [user, loading] = useAuthState(auth);
 
   useEffect(() => {
-    if (user) navigate("/app", { replace: true });
+    if (user) navigate("/app");
   }, [user, navigate]);
 
-  async function handleGoogle() {
-    try {
-      await signInWithPopup(auth, googleProvider);
-      navigate("/app", { replace: true }); // redireciona logo após login
-    } catch (e) {
-      alert("Falha no login: " + (e as Error).message);
-    }
-  }
+  const loginGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  };
 
   return (
-    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter, system-ui, sans-serif"}}>
-      <div style={{padding:24,border:"1px solid #eee",borderRadius:12,boxShadow:"0 8px 30px rgba(0,0,0,.05)"}}>
-        <h2 style={{marginTop:0}}>FacilitaMed</h2>
-        <button onClick={handleGoogle} style={{padding:"10px 16px",borderRadius:10,border:"1px solid #ddd",cursor:"pointer"}}>
-          Entrar com Google
-        </button>
-        {loading && <p style={{opacity:.7}}>Carregando...</p>}
+    <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ textAlign: "center" }}>
+        <h1>FacilitaMed</h1>
+        {!user && <button onClick={loginGoogle}>Entrar com Google</button>}
       </div>
     </div>
   );
